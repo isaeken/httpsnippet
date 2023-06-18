@@ -1,0 +1,4 @@
+wget \
+  --method="GET" \
+  --header="Host: example.com" \
+  "http://example.com"

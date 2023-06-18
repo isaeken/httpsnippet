@@ -1,0 +1,7 @@
+var client = new RestClient("http://example.com");
+var request = new RestRequest(Method.GET);
+
+request.AddHeader("Host", "example.com");
+
+IRestResponse response = client.Execute(request);
+Console.WriteLine(response.Content);

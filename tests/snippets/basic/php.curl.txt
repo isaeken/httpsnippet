@@ -1,0 +1,24 @@
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_PORT, );
+curl_setopt($curl, CURLOPT_URL, "http://example.com");
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_ENCODING, "");
+curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+
+curl_setopt($curl, CURLOPT_HTTPHEADER, [
+    "Host: example.com",
+]);
+
+$response = curl_exec($curl);
+$err = curl_error($curl);
+$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+curl_close($curl);
+
+if ($err) {
+    echo "cURL Error #:" . $err;
+} else {
+    echo $response;
+}
