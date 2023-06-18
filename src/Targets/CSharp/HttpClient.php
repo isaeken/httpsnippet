@@ -102,7 +102,7 @@ class HttpClient extends AbstractTarget implements Target
         $code->addLine(sprintf('Method = HttpMethod.%s,', ucfirst(strtolower($method))), 1);
         $code->addLine(sprintf('RequestUri = new Uri("%s"),', escapeForDoubleQuotes($uri)), 1);
 
-        $headers = array_filter($headers, function ($key) {
+        $headers = array_filter($headers, function (string $key) {
             return ! in_array(strtolower($key), [
                 'content-type',
                 'content-length',
