@@ -1,0 +1,100 @@
+#!/usr/bin/php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use GuzzleHttp\Psr7\Request;
+use IsaEken\HttpSnippet\HttpSnippet;
+
+$method = 'GET';
+$url = null;
+$headers = [];
+$body = null;
+$language = null;
+$output = null;
+
+function help(): never
+{
+    echo 'Usage: httpsnippet --url= --language= [options]' . PHP_EOL;
+
+    echo PHP_EOL;
+    echo 'Options:' . PHP_EOL;
+    echo '  --help : Displays this screen' . PHP_EOL;
+    echo '  --method=GET : Set the request method' . PHP_EOL;
+    echo '  --url=http://example.com : Set the url' . PHP_EOL;
+    echo '  --header="Content-Type: application/json" : Add a header' . PHP_EOL;
+    echo '  --body="{}" : Set the body' . PHP_EOL;
+    echo '  --language=php.curl : Set the language' . PHP_EOL;
+    echo '  --output= : Set the output' . PHP_EOL;
+    echo PHP_EOL;
+    echo 'Examples:' . PHP_EOL;
+    echo '  httpsnippet --url=http://example.com --language=php.curl' . PHP_EOL;
+    echo '  httpsnippet --url=http://example.com --language=php.curl --output=snippet.php' . PHP_EOL;
+    echo '  httpsnippet --url=http://example.com --language=shell.curl --output=php://stdout' . PHP_EOL;
+    echo PHP_EOL;
+    echo 'Languages:' . PHP_EOL;
+
+    foreach (HttpSnippet::getTargets() as $target) {
+        echo '  ' . $target['title'] . ' : ' . $target['name'] . PHP_EOL;
+        echo '  ' . $target['link'] . PHP_EOL;
+        echo '  ' . $target['description'] . PHP_EOL;
+        echo PHP_EOL;
+    }
+
+    exit(0);
+}
+
+foreach ($argv as $item) {
+    if (str_starts_with($item, '--help')) {
+        help();
+    }
+
+    if (str_starts_with($item, '--method=')) {
+        $method = substr($item, 9);
+    }
+
+    if (str_starts_with($item, '--url=')) {
+        $url = substr($item, 6);
+    }
+
+    if (str_starts_with($item, '--header=')) {
+        $headers[] = substr($item, 9);
+    }
+
+    if (str_starts_with($item, '--body=')) {
+        $body = substr($item, 7);
+    }
+
+    if (str_starts_with($item, '--language=')) {
+        $language = substr($item, 11);
+    }
+
+    if (str_starts_with($item, '--output=')) {
+        $output = substr($item, 9);
+    }
+}
+
+if ($url === null) {
+    echo 'Error: --url is required.' . PHP_EOL;
+    exit(1);
+}
+
+if ($language === null) {
+    echo 'Error: --language is required.' . PHP_EOL;
+    exit(1);
+}
+
+$output = $output ?? 'php://stdout';
+$output = fopen($output, 'w');
+$headers = array_map(fn($item) => explode(':', $item, 2), $headers);
+
+$request = new Request(
+    $method,
+    $url,
+    $headers,
+    $body,
+);
+
+$httpSnippet = HttpSnippet::make($request, $language);
+
+echo $httpSnippet->generate(true);
