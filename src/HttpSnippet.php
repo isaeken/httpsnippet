@@ -116,6 +116,12 @@ class HttpSnippet
         return $cookieJar;
     }
 
+    public function generate(bool|null $fullCode = null): string
+    {
+        $this->generateFullCode = $fullCode ?? $this->generateFullCode;
+        return $this->getTarget()->toString();
+    }
+
     public static function make(RequestInterface $request, string $target): static
     {
         return (new static())
