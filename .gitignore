@@ -2,6 +2,11 @@
 /.vscode
 /vendor
 /node_modules
+/build
+/docs
+/coverage
 .phpunit.result.cache
 composer.lock
 test.php
+.php-cs-fixer.cache
+*.cache

@@ -1,65 +1,71 @@
 {
-  "name": "isaeken/httpsnippet",
-  "description": "Generate HTTP request snippets for any programming languages",
-  "version": "1.0",
-  "type": "library",
-  "keywords": [
-    "http",
-    "request",
-    "generator"
-  ],
-  "homepage": "https://github.com/isaeken/httpsnippet",
-  "readme": "README.md",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Isa Eken",
-      "email": "hello@isaeken.com.tr",
-      "homepage": "https://isaeken.com.tr",
-      "role": "Developer"
-    }
-  ],
-  "support": {
-    "wiki": "https://github.com/isaeken/httpsnippet/wiki",
-    "issues": "https://github.com/isaeken/httpsnippet/issues",
-    "source": "https://github.com/isaeken/httpsnippet",
-    "docs": "https://github.com/isaeken/httpsnippet/wiki"
-  },
-  "funding": [
-    {
-      "url": "https://github.com/isaeken",
-      "type": "github"
-    }
-  ],
-  "scripts": {
-    "pint": "./vendor/bin/pint",
-    "test": "./vendor/bin/phpunit"
-  },
-  "require": {
-    "php": "^8.2",
-    "ext-curl": "*",
-    "ext-mbstring": "*",
-    "ext-dom": "*",
-    "symfony/http-foundation": "^6.2",
-    "guzzlehttp/guzzle": "^7.0",
-    "illuminate/support": "^10.13"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^9.6.8",
-    "symfony/var-dumper": "^6.2",
-    "laravel/pint": "^1.10"
-  },
-  "autoload": {
-    "psr-4": {
-      "IsaEken\\HttpSnippet\\": "src/"
+    "name": "isaeken/httpsnippet",
+    "description": "Generate HTTP request snippets for any programming languages",
+    "version": "1.0",
+    "type": "library",
+    "keywords": [
+        "http",
+        "request",
+        "generator"
+    ],
+    "homepage": "https://github.com/isaeken/httpsnippet",
+    "readme": "README.md",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Isa Eken",
+            "email": "hello@isaeken.com.tr",
+            "homepage": "https://isaeken.com.tr",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "wiki": "https://github.com/isaeken/httpsnippet/wiki",
+        "issues": "https://github.com/isaeken/httpsnippet/issues",
+        "source": "https://github.com/isaeken/httpsnippet",
+        "docs": "https://github.com/isaeken/httpsnippet/wiki"
     },
-    "files": [
-      "src/helpers.php"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "IsaEken\\HttpSnippet\\Tests\\": "tests/"
+    "funding": [
+        {
+            "url": "https://github.com/isaeken",
+            "type": "github"
+        }
+    ],
+    "scripts": {
+        "pint": "./vendor/bin/pint",
+        "test": "./vendor/bin/phpunit"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-curl": "*",
+        "ext-mbstring": "*",
+        "ext-dom": "*",
+        "symfony/http-foundation": "^6.2",
+        "guzzlehttp/guzzle": "^7.0",
+        "illuminate/support": "^10.13"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6.8",
+        "symfony/var-dumper": "^6.2",
+        "pestphp/pest": "^1.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "IsaEken\\HttpSnippet\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "IsaEken\\HttpSnippet\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
-  }
 }
