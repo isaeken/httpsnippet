@@ -22,6 +22,8 @@ class HttpSnippet
         'shell.wget' => Targets\Shell\Wget::class,
     ];
 
+    public bool $generateFullCode = false;
+
     public RequestInterface|null $request = null;
 
     public Target|null $target = null;

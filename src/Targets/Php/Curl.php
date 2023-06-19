@@ -35,16 +35,22 @@ class Curl extends AbstractTarget implements Target
         $headers = $this->getHttpSnippet()->getRequest()->getHeaders();
         $cookies = $this->getHttpSnippet()->getCookies();
 
-        $code->addLine('$curl = curl_init();');
+        if ($this->getHttpSnippet()->generateFullCode) {
+            $code->addLine('<?php');
+            $code->addEmptyLine();
+        }
 
-        $code->addLine(sprintf('curl_setopt($curl, CURLOPT_PORT, %s);', $port));
-        $code->addLine(sprintf('curl_setopt($curl, CURLOPT_URL, "%s");', $url));
-        $code->addLine('curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);');
-        $code->addLine('curl_setopt($curl, CURLOPT_ENCODING, "");');
-        $code->addLine('curl_setopt($curl, CURLOPT_MAXREDIRS, 10);');
-        $code->addLine('curl_setopt($curl, CURLOPT_TIMEOUT, 30);');
-        $code->addLine('curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);');
-        $code->addLine(sprintf('curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "%s");', $method));
+        $code->addLines([
+            '$curl = curl_init();',
+            sprintf('curl_setopt($curl, CURLOPT_PORT, %s);', $port),
+            sprintf('curl_setopt($curl, CURLOPT_URL, "%s");', $url),
+            'curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);',
+            'curl_setopt($curl, CURLOPT_ENCODING, "");',
+            'curl_setopt($curl, CURLOPT_MAXREDIRS, 10);',
+            'curl_setopt($curl, CURLOPT_TIMEOUT, 30);',
+            'curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);',
+            sprintf('curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "%s");', $method),
+        ]);
 
         if (strlen($body) > 0) {
             if ($this->getHttpSnippet()->isJson()) {
@@ -60,7 +66,7 @@ class Curl extends AbstractTarget implements Target
         }
 
         if (count($headers) > 0) {
-            $code->addLine('');
+            $code->addEmptyLine();
             $code->addLine('curl_setopt($curl, CURLOPT_HTTPHEADER, [');
             foreach ($headers as $key => $value) {
                 $header = sprintf('%s: %s', escapeForDoubleQuotes($key), escapeForDoubleQuotes($value[0]));
@@ -70,7 +76,7 @@ class Curl extends AbstractTarget implements Target
         }
 
         if (count($cookies) > 0) {
-            $code->addLine('');
+            $code->addEmptyLine();
 
             foreach ($cookies as $cookie) {
                 $name = urlencode($cookie->getName());
@@ -80,12 +86,12 @@ class Curl extends AbstractTarget implements Target
             }
         }
 
-        $code->addLine('');
+        $code->addEmptyLine();
         $code->addLine('$response = curl_exec($curl);');
         $code->addLine('$err = curl_error($curl);');
         $code->addLine('$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);');
         $code->addLine('curl_close($curl);');
-        $code->addLine('');
+        $code->addEmptyLine();
         $code->addLine('if ($err) {');
         $code->addLine('echo "cURL Error #:" . $err;', 1);
         $code->addLine('} else {');
