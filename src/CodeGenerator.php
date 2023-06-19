@@ -64,17 +64,17 @@ class CodeGenerator
                 $lineNumber = $this->line_numbers ? "[$currentLine] " : '';
                 $intent = str_repeat(
                     $this->intent_char,
-                    ($line['intent'] * $this->intents) + (($maxCurrentLineCharacterLength + 3) - strlen($lineNumber))
+                    (($line['intent'] ?? 0 * $this->intents) + $this->intent * $this->intents) + (($maxCurrentLineCharacterLength + 3) - strlen($lineNumber))
                 );
             } else {
                 $lineNumber = '';
                 $intent = str_repeat(
                     $this->intent_char,
-                    ($line['intent'] * $this->intents)
+                    (($line['intent'] ?? 0) * $this->intents) + ($this->intent * $this->intents)
                 );
             }
 
-            $code = $line['code'];
+            $code = $line['code'] ?? '';
 
             if ($line['divider']) {
                 $code .= $this->divider;

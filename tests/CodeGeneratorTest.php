@@ -9,16 +9,16 @@ class CodeGeneratorTest extends TestCase
 {
     public function testAddLineAndToString(): void
     {
-        $codeGenerator = new CodeGenerator(2);
+        $codeGenerator = new CodeGenerator(1);
 
         $codeGenerator->addLine('echo "Hello, World!";', 1);
-        $codeGenerator->addLine('return 0;', 1);
+        $codeGenerator->addLine('return 0;');
 
         $codeGenerator->line_ending = "\n";
         $codeGenerator->intents = 4;
         $codeGenerator->intent_char = " ";
 
-        $expectedResult = "    echo \"Hello, World!\";\n    return 0;\n";
+        $expectedResult = "        echo \"Hello, World!\";\n    return 0;\n";
 
         $this->assertEquals($expectedResult, $codeGenerator->toString());
     }
