@@ -137,4 +137,9 @@ class HttpSnippet
     {
         return Arr::map(array_values(self::$targets), fn ($target) => $target::info());
     }
+
+    public static function addTarget(string $key, string $class): void
+    {
+        self::$targets[$key] = $class;
+    }
 }
