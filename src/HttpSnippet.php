@@ -122,11 +122,12 @@ class HttpSnippet
         return $this->getTarget()->toString();
     }
 
-    public static function make(RequestInterface $request, string $target): static
+    public static function make(RequestInterface $request, string $target): Target
     {
         return (new static())
             ->useRequest($request)
-            ->useTarget($target);
+            ->useTarget($target)
+            ->getTarget();
     }
 
     /**
