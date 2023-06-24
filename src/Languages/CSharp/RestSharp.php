@@ -1,40 +1,29 @@
 <?php
 
-namespace IsaEken\HttpSnippet\Targets\CSharp;
+namespace IsaEken\HttpSnippet\Languages\CSharp;
 
+use IsaEken\HttpSnippet\Abstracts\AbstractLanguage;
 use IsaEken\HttpSnippet\CodeGenerator;
-use IsaEken\HttpSnippet\Contracts\Target;
+use IsaEken\HttpSnippet\Contracts\Language;
 use IsaEken\HttpSnippet\Enums\ContentType;
-use IsaEken\HttpSnippet\Targets\AbstractTarget;
-use JetBrains\PhpStorm\ArrayShape;
 
-class RestSharp extends AbstractTarget implements Target
+class RestSharp extends AbstractLanguage implements Language
 {
-    #[ArrayShape([
-        'name' => 'string',
-        'title' => 'string',
-        'link' => 'string',
-        'description' => 'string',
-    ])]
-    public static function info(): array
-    {
-        return [
-            'name' => 'csharp.restsharp',
-            'title' => 'RestSharp',
-            'link' => 'https://restsharp.dev/',
-            'description' => 'Simple REST and HTTP API Client for .NET.',
-        ];
-    }
+    public static string|null $name = 'csharp.restsharp';
+    public static string|null $title = 'C# RestSharp';
+    public static string|null $link = 'https://restsharp.dev/';
+    public static string|null $description = 'Simple REST and HTTP API Client for .NET.';
 
     public function make(): CodeGenerator
     {
         $code = new CodeGenerator();
-        $uri = (string) $this->getHttpSnippet()->getRequest()->getUri();
-        $method = $this->getHttpSnippet()->getRequest()->getMethod();
-        $headers = $this->getHttpSnippet()->getRequest()->getHeaders();
-        $cookies = $this->getHttpSnippet()->getCookies();
-        $body = $this->getHttpSnippet()->getRequest()->getBody();
-        $contentType = $this->getHttpSnippet()->getContentType();
+        $request = $this->getHttpSnippet()->getRequest();
+        $uri = (string) $request->getUri();
+        $method = $request->getMethod();
+        $headers = $request->getHeaders();
+        $cookies = $request->getCookies();
+        $body = $request->getBody();
+        $contentType = $request->getContentType();
 
         $code->addLine(sprintf('var client = new RestClient("%s");', $uri));
         $code->addLine(sprintf('var request = new RestRequest(Method.%s);', $method));

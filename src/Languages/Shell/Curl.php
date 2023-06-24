@@ -1,30 +1,17 @@
 <?php
 
-namespace IsaEken\HttpSnippet\Targets\Shell;
+namespace IsaEken\HttpSnippet\Languages\Shell;
 
+use IsaEken\HttpSnippet\Abstracts\AbstractLanguage;
 use IsaEken\HttpSnippet\CodeGenerator;
-use IsaEken\HttpSnippet\Contracts\Target;
 use IsaEken\HttpSnippet\Enums\ContentType;
-use IsaEken\HttpSnippet\Targets\AbstractTarget;
-use JetBrains\PhpStorm\ArrayShape;
 
-class Curl extends AbstractTarget implements Target
+class Curl extends AbstractLanguage
 {
-    #[ArrayShape([
-        'name' => 'string',
-        'title' => 'string',
-        'link' => 'string',
-        'description' => 'string',
-    ])]
-    public static function info(): array
-    {
-        return [
-            'name' => 'shell.curl',
-            'title' => 'cURL',
-            'link' => 'https://curl.haxx.se/',
-            'description' => 'cURL is a command line tool and library for transferring data with URL syntax',
-        ];
-    }
+    public static string|null $name = 'shell.curl';
+    public static string|null $title = 'Shell cURL';
+    public static string|null $link = 'https://curl.haxx.se/';
+    public static string|null $description = 'cURL is a command line tool and library for transferring data with URL syntax';
 
     public function make(): CodeGenerator
     {
@@ -33,12 +20,13 @@ class Curl extends AbstractTarget implements Target
             divider: " \\"
         );
 
-        $uri = (string) $this->getHttpSnippet()->getRequest()->getUri();
-        $method = $this->getHttpSnippet()->getRequest()->getMethod();
-        $headers = $this->getHttpSnippet()->getRequest()->getHeaders();
-        $cookies = $this->getHttpSnippet()->getCookies();
-        $body = $this->getHttpSnippet()->getRequest()->getBody();
-        $contentType = $this->getHttpSnippet()->getContentType();
+        $request = $this->getHttpSnippet()->getRequest();
+        $uri = (string) $request->getUri();
+        $method = $request->getMethod();
+        $headers = $request->getHeaders();
+        $cookies = $request->getCookies();
+        $body = $request->getBody();
+        $contentType = $request->getContentType();
 
         $code->addLine('curl');
 

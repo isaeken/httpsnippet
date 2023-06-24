@@ -1,44 +1,29 @@
 <?php
 
-namespace IsaEken\HttpSnippet\Targets\Php;
+namespace IsaEken\HttpSnippet\Languages\Php;
 
+use IsaEken\HttpSnippet\Abstracts\AbstractLanguage;
 use IsaEken\HttpSnippet\CodeGenerator;
-use IsaEken\HttpSnippet\Contracts\Target;
-use IsaEken\HttpSnippet\Targets\AbstractTarget;
+use IsaEken\HttpSnippet\Contracts\Language;
 use JetBrains\PhpStorm\ArrayShape;
 
-class Curl extends AbstractTarget implements Target
+class Curl extends AbstractLanguage implements Language
 {
-    #[ArrayShape([
-        'name' => 'string',
-        'title' => 'string',
-        'link' => 'string',
-        'description' => 'string',
-    ])]
-    public static function info(): array
-    {
-        return [
-            'name' => 'php.curl',
-            'title' => 'cURL',
-            'link' => 'https://www.php.net/manual/en/book.curl.php',
-            'description' => 'PHP with ext-curl.',
-        ];
-    }
+    public static string|null $name = 'php.curl';
+    public static string|null $title = 'PHP cURL';
+    public static string|null $link = 'https://www.php.net/manual/en/book.curl.php';
+    public static string|null $description = 'PHP with ext-curl.';
 
     public function make(): CodeGenerator
     {
         $code = new CodeGenerator();
-        $port = $this->getHttpSnippet()->getRequest()->getUri()->getPort();
-        $url = (string) $this->getHttpSnippet()->getRequest()->getUri();
-        $method = $this->getHttpSnippet()->getRequest()->getMethod();
-        $body = $this->getHttpSnippet()->getRequest()->getBody()->getContents();
-        $headers = $this->getHttpSnippet()->getRequest()->getHeaders();
-        $cookies = $this->getHttpSnippet()->getCookies();
-
-        if ($this->getHttpSnippet()->generateFullCode) {
-            $code->addLine('<?php');
-            $code->addEmptyLine();
-        }
+        $request = $this->getHttpSnippet()->getRequest();
+        $port = $request->getUri()->getPort();
+        $url = (string) $request->getUri();
+        $method = $request->getMethod();
+        $body = $request->getBody()->getContents();
+        $headers = $request->getHeaders();
+        $cookies = $request->getCookies();
 
         $code->addLines([
             '$curl = curl_init();',
@@ -53,7 +38,7 @@ class Curl extends AbstractTarget implements Target
         ]);
 
         if (strlen($body) > 0) {
-            if ($this->getHttpSnippet()->isJson()) {
+            if ($request->isJson()) {
                 $code->addLine('curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([');
                 $body = json_decode($body, true);
                 foreach ($body as $key => $value) {

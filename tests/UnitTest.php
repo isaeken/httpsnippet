@@ -2,17 +2,17 @@
 
 namespace IsaEken\HttpSnippet\Tests;
 
+use Error;
 use GuzzleHttp\Psr7\Request;
-use IsaEken\HttpSnippet\Exceptions\TargetNotFoundException;
+use IsaEken\HttpSnippet\Exceptions\LanguageNotFoundException;
 use IsaEken\HttpSnippet\HttpSnippet;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 class UnitTest extends TestCase
 {
-    public function testIsThrowsWhenTargetNotFound()
+    public function testIsThrowsWhenLanguageNotFound()
     {
-        $this->expectException(TargetNotFoundException::class);
+        $this->expectException(LanguageNotFoundException::class);
         HttpSnippet::make(
             new Request(
                 'GET',
@@ -22,23 +22,25 @@ class UnitTest extends TestCase
         );
     }
 
-    public function testIsThrowsWhenTargetIsNotSet()
+    public function testIsThrowsWhenLanguageIsNotSet()
     {
-        $this->expectException(TypeError::class);
+        $this->expectException(Error::class);
+        $this->expectExceptionMessage('must not be accessed before initialization');
         $object = new HttpSnippet();
-        $this->assertNull($object->getTarget());
+        $this->assertNull($object->getLanguage());
     }
 
     public function testIsThrowsWhenRequestIsNotSet()
     {
-        $this->expectException(TypeError::class);
+        $this->expectException(Error::class);
+        $this->expectExceptionMessage('must not be accessed before initialization');
         $object = new HttpSnippet();
         $this->assertNull($object->getRequest());
     }
 
-    public function testIsCanSetTarget()
+    public function testIsCanSetLanguage()
     {
-        $targets = [
+        $languages = [
             'c.libcurl',
             'csharp.httpclient',
             'csharp.restsharp',
@@ -47,18 +49,11 @@ class UnitTest extends TestCase
             'shell.wget',
         ];
 
-        foreach ($targets as $target) {
+        foreach ($languages as $language) {
             $object = new HttpSnippet();
 
-            $object->setTarget($target);
-            $this->assertSame($object->getTarget()::info()['name'], $target);
-        }
-
-        foreach ($targets as $target) {
-            $object = new HttpSnippet();
-
-            $object->useTarget($target);
-            $this->assertSame($object->getTarget()::info()['name'], $target);
+            $object->setLanguage(new ($object->getLanguages()[$language]));
+            $this->assertSame($object->getLanguage()::info()['name'], $language);
         }
     }
 

@@ -1,31 +1,19 @@
 <?php
 
-namespace IsaEken\HttpSnippet\Targets\C;
+namespace IsaEken\HttpSnippet\Languages\C;
 
 use GuzzleHttp\Cookie\CookieJarInterface;
+use IsaEken\HttpSnippet\Abstracts\AbstractLanguage;
 use IsaEken\HttpSnippet\CodeGenerator;
-use IsaEken\HttpSnippet\Contracts\Target;
-use IsaEken\HttpSnippet\Targets\AbstractTarget;
-use JetBrains\PhpStorm\ArrayShape;
+use IsaEken\HttpSnippet\Contracts\Language;
 use Psr\Http\Message\StreamInterface;
 
-class LibCurl extends AbstractTarget implements Target
+class LibCurl extends AbstractLanguage implements Language
 {
-    #[ArrayShape([
-        'name' => 'string',
-        'title' => 'string',
-        'link' => 'string',
-        'description' => 'string',
-    ])]
-    public static function info(): array
-    {
-        return [
-            'name' => 'c.libcurl',
-            'title' => 'LibCurl',
-            'link' => 'https://curl.se/libcurl/c/',
-            'description' => 'Simple REST and HTTP API Client for C.',
-        ];
-    }
+    public static string|null $name = 'c.libcurl';
+    public static string|null $title = 'C LibCurl';
+    public static string|null $link = 'https://curl.se/libcurl/c/';
+    public static string|null $description = 'Simple REST and HTTP API Client for C.';
 
     public function makeHeaders(array $headers, CodeGenerator $code): CodeGenerator
     {
@@ -76,22 +64,15 @@ class LibCurl extends AbstractTarget implements Target
     public function make(): CodeGenerator
     {
         $code = new CodeGenerator();
-        $method = $this->getHttpSnippet()->getRequest()->getMethod();
-        $uri = (string) $this->getHttpSnippet()->getRequest()->getUri();
-        $headers = $this->getHttpSnippet()->getRequest()->getHeaders();
-        $cookies = $this->getHttpSnippet()->getCookies();
-        $body = $this->getHttpSnippet()->getRequest()->getBody();
+        $request = $this->getHttpSnippet()->getRequest();
+        $method = $request->getMethod();
+        $uri = (string) $request->getUri();
+        $headers = $request->getHeaders();
+        $cookies = $request->getCookies();
+        $body = $request->getBody();
         $intent = 0;
 
-        if ($this->getHttpSnippet()->generateFullCode) {
-            $code->addLine('#include <curl/curl.h>');
-            $code->addLine('');
-            $code->addLine('int main(void) {');
-            $intent = 1;
-        }
-
         $content = new CodeGenerator(intent: $intent);
-
         $content->addLine('CURL *hnd = curl_easy_init();');
         $content->addEmptyLine();
         $content->addLine(sprintf('curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "%s");', $method));
@@ -104,13 +85,7 @@ class LibCurl extends AbstractTarget implements Target
         $content->addEmptyLine();
         $content->addLine('curl_easy_cleanup(hnd);');
         $content->addLine('curl_slist_free_all(headers);');
-
         $code->addLines($content->toArray());
-
-        if ($this->getHttpSnippet()->generateFullCode) {
-            $code->addLine('return (int) ret;', 1);
-            $code->addLine('}');
-        }
 
         return $code;
     }

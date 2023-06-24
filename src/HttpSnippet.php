@@ -2,144 +2,81 @@
 
 namespace IsaEken\HttpSnippet;
 
-use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Cookie\CookieJarInterface;
-use GuzzleHttp\Cookie\SetCookie;
 use Illuminate\Support\Arr;
-use IsaEken\HttpSnippet\Contracts\Target;
-use IsaEken\HttpSnippet\Enums\ContentType;
-use IsaEken\HttpSnippet\Exceptions\TargetNotFoundException;
+use IsaEken\HttpSnippet\Contracts\Language;
+use IsaEken\HttpSnippet\Exceptions\LanguageNotFoundException;
+use IsaEken\HttpSnippet\Traits\HasLanguage;
+use IsaEken\HttpSnippet\Traits\HasRequest;
+use IsaEken\HttpSnippet\Languages;
 use Psr\Http\Message\RequestInterface;
 
 class HttpSnippet
 {
-    public static array $targets = [
-        'c.libcurl' => Targets\C\LibCurl::class,
-        'csharp.httpclient' => Targets\CSharp\HttpClient::class,
-        'csharp.restsharp' => Targets\CSharp\RestSharp::class,
-        'php.curl' => Targets\Php\Curl::class,
-        'shell.curl' => Targets\Shell\Curl::class,
-        'shell.wget' => Targets\Shell\Wget::class,
+    use HasLanguage;
+    use HasRequest;
+
+    public array $languages = [
+        'c.libcurl' => Languages\C\LibCurl::class,
+        'csharp.httpclient' => Languages\CSharp\HttpClient::class,
+        'csharp.restsharp' => Languages\CSharp\RestSharp::class,
+        'php.curl' => Languages\Php\Curl::class,
+        'shell.curl' => Languages\Shell\Curl::class,
+        'shell.wget' => Languages\Shell\Wget::class,
     ];
-
-    public bool $generateFullCode = false;
-
-    public RequestInterface|null $request = null;
-
-    public Target|null $target = null;
-
-    public function setTarget(string $target): void
-    {
-        if (! array_key_exists($target, self::$targets)) {
-            throw new TargetNotFoundException($target);
-        }
-
-        $this->target = new (self::$targets[$target])($this);
-    }
-
-    public function useTarget(string $target): HttpSnippet
-    {
-        return tap($this, fn () => $this->setTarget($target));
-    }
-
-    public function getTarget(): Target
-    {
-        return $this->target;
-    }
-
-    public function setRequest(RequestInterface $request): void
-    {
-        $this->request = $request;
-    }
-
-    public function useRequest(RequestInterface $request): HttpSnippet
-    {
-        return tap($this, fn () => $this->setRequest($request));
-    }
-
-    public function getRequest(): RequestInterface
-    {
-        return $this->request;
-    }
-
-    public function isJson(): bool
-    {
-        return $this->getContentType() === ContentType::JSON;
-    }
-
-    public function getContentType(): ContentType
-    {
-        $contentType = $this->getRequest()->getHeaderLine('Content-Type');
-
-        if (str_contains($contentType, 'application/json')) {
-            return ContentType::JSON;
-        }
-
-        if (str_contains($contentType, 'application/x-www-form-urlencoded')) {
-            return ContentType::FORM;
-        }
-
-        if (str_contains($contentType, 'multipart/form-data')) {
-            return ContentType::MULTIPART;
-        }
-
-        return ContentType::RAW;
-    }
-
-    public function getCookies(): CookieJarInterface
-    {
-        $request = $this->getRequest();
-
-        $cookies = [];
-        $cookieHeaderLine = $request->getHeaderLine('Cookie');
-
-        if ($cookieHeaderLine) {
-            $cookiePairs = explode('; ', $cookieHeaderLine);
-
-            foreach ($cookiePairs as $cookiePair) {
-                [$name, $value] = explode('=', $cookiePair, 2);
-
-                $cookies[] = [
-                    'Name' => $name,
-                    'Value' => $value,
-                    'Domain' => $request->getUri()->getHost(),
-                    'Path' => $request->getUri()->getPath(),
-                ];
-            }
-        }
-
-        $cookieJar = new CookieJar();
-        foreach ($cookies as $cookie) {
-            $cookieJar->setCookie(new SetCookie($cookie));
-        }
-
-        return $cookieJar;
-    }
-
-    public function generate(bool|null $fullCode = null): string
-    {
-        $this->generateFullCode = $fullCode ?? $this->generateFullCode;
-        return $this->getTarget()->toString();
-    }
-
-    public static function make(RequestInterface $request, string $target): Target
-    {
-        return (new static())
-            ->useRequest($request)
-            ->useTarget($target)
-            ->getTarget();
-    }
 
     /**
      * @return array<array{name: string, title: string, link: string, description: string}>
      */
-    public static function getTargets(): array
+    public function getAvailableLanguages(): array
     {
-        return Arr::map(array_values(self::$targets), fn ($target) => $target::info());
+        return Arr::map(array_values($this->languages), fn ($language) => $language::info());
     }
 
-    public static function addTarget(string $key, string $class): void
+    public function getLanguages(): array
     {
-        self::$targets[$key] = $class;
+        return $this->languages;
+    }
+
+    public function setLanguages(array $languages): self
+    {
+        return tap($this, function () use ($languages) {
+            $this->languages = $languages;
+        });
+    }
+
+    public function registerLanguage(string $class): self
+    {
+        return tap($this, function () use ($class) {
+            $name = getHttpSnippetLanguageName($class);
+            $this->languages[$name] = $class;
+        });
+    }
+
+    public function unregisterLanguage(string $classOrName): self
+    {
+        return tap($this, function () use ($classOrName) {
+            if (array_key_exists($classOrName, $this->languages)) {
+                unset($this->languages[$classOrName]);
+                return;
+            }
+
+            $name = getHttpSnippetLanguageName($classOrName);
+            unset($this->languages[$name]);
+        });
+    }
+
+    public static function make(RequestInterface $request, string $language): Language
+    {
+        $instance = new static();
+        $instance->useRequest($request);
+
+        if (! array_key_exists($language, $instance->getLanguages())) {
+            throw new LanguageNotFoundException($language);
+        }
+
+        $language = new ($instance->getLanguages()[$language]);
+
+        /** @var Language $language */
+        return $language->useHttpSnippet($instance);
     }
 }

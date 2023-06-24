@@ -24,30 +24,10 @@ class RequestTest extends TestCase
             'http://example.com',
         );
 
-        foreach ($tests as $target => $output) {
-            $httpSnippet = HttpSnippet::make($request, $target);
+        foreach ($tests as $language => $output) {
+            $httpSnippet = HttpSnippet::make($request, $language);
             $output = trim(str_replace("\r\n", "\n", $output));
-            $result = trim(str_replace("\r\n", "\n", $httpSnippet->target->toString()));
-            $this->assertSame($output, $result);
-        }
-    }
-
-    public function testBasicRequestWithFullCode()
-    {
-        $tests = [
-            'php.curl' => "<?php\r\n\r\n".file_get_contents(__DIR__.'/snippets/basic/php.curl.txt'),
-        ];
-
-        $request = new Request(
-            'GET',
-            'http://example.com',
-        );
-
-        foreach ($tests as $target => $output) {
-            $httpSnippet = HttpSnippet::make($request, $target);
-            $httpSnippet->generateFullCode = true;
-            $output = trim(str_replace("\r\n", "\n", $output));
-            $result = trim(str_replace("\r\n", "\n", $httpSnippet->target->toString()));
+            $result = trim(str_replace("\r\n", "\n", $httpSnippet->toString()));
             $this->assertSame($output, $result);
         }
     }

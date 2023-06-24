@@ -1,30 +1,18 @@
 <?php
 
-namespace IsaEken\HttpSnippet\Targets\CSharp;
+namespace IsaEken\HttpSnippet\Languages\CSharp;
 
+use IsaEken\HttpSnippet\Abstracts\AbstractLanguage;
 use IsaEken\HttpSnippet\CodeGenerator;
-use IsaEken\HttpSnippet\Contracts\Target;
+use IsaEken\HttpSnippet\Contracts\Language;
 use IsaEken\HttpSnippet\Enums\ContentType;
-use IsaEken\HttpSnippet\Targets\AbstractTarget;
-use JetBrains\PhpStorm\ArrayShape;
 
-class HttpClient extends AbstractTarget implements Target
+class HttpClient extends AbstractLanguage implements Language
 {
-    #[ArrayShape([
-        'name' => 'string',
-        'title' => 'string',
-        'link' => 'string',
-        'description' => 'string',
-    ])]
-    public static function info(): array
-    {
-        return [
-            'name' => 'csharp.httpclient',
-            'title' => 'HttpClient',
-            'link' => 'https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient',
-            'description' => '.NET Standard HTTP client.',
-        ];
-    }
+    public static string|null $name = 'csharp.httpclient';
+    public static string|null $title = 'C# HttpClient';
+    public static string|null $link = 'https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient';
+    public static string|null $description = '.NET Standard HTTP client.';
 
     private function getDecompressionMethods(array $headers): array
     {
@@ -66,12 +54,13 @@ class HttpClient extends AbstractTarget implements Target
     public function make(): CodeGenerator
     {
         $code = new CodeGenerator();
-        $uri = (string) $this->getHttpSnippet()->getRequest()->getUri();
-        $method = $this->getHttpSnippet()->getRequest()->getMethod();
-        $headers = $this->getHttpSnippet()->getRequest()->getHeaders();
-        $cookies = $this->getHttpSnippet()->getCookies();
-        $body = $this->getHttpSnippet()->getRequest()->getBody()->getContents();
-        $contentType = $this->getHttpSnippet()->getContentType();
+        $request = $this->getHttpSnippet()->getRequest();
+        $uri = (string) $request->getUri();
+        $method = $request->getMethod();
+        $headers = $request->getHeaders();
+        $cookies = $request->getCookies();
+        $body = $request->getBody()->getContents();
+        $contentType = $request->getContentType();
 
         $code->addLine('using System.Net.Http.Headers;');
         $code->addLine('using System.Net.Http;');

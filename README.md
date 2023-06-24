@@ -39,15 +39,12 @@ return \IsaEken\HttpSnippet\HttpSnippet::make($request, 'php.curl')->toString();
 ## Custom languages
 
 You can create custom languages.
-    
+
 ```php
-use IsaEken\HttpSnippet\Targets\AbstractTarget;
-use IsaEken\HttpSnippet\Contracts\Target;
-use IsaEken\HttpSnippet\CodeGenerator;
-use IsaEken\HttpSnippet\HttpSnippet;
+use IsaEken\HttpSnippet\Abstracts\AbstractLanguage;use IsaEken\HttpSnippet\CodeGenerator;use IsaEken\HttpSnippet\Contracts\Language;use IsaEken\HttpSnippet\HttpSnippet;
 
 // create custom language
-class CustomLanguage extends AbstractTarget implements Target
+class CustomLanguage extends AbstractLanguage implements Language
 {
     public static function info(): array
     {
