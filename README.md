@@ -23,7 +23,61 @@ composer require isaeken/httpsnippet
 
 ```php
 $request = new \GuzzleHttp\Psr7\Request('GET', 'https://example.com');
-return \IsaEken\HttpSnippet\HttpSnippet::make($request, 'php.curl');
+return \IsaEken\HttpSnippet\HttpSnippet::make($request, 'php.curl')->toString();
+// returns php code for send GET request with curl as string
+```
+
+## Available languages
+
+- `c.curl`
+- `csharp.httpclient`
+- `csharp.restsharp`
+- `php.curl`
+- `shell.curl`
+- `shell.wget`
+
+## Custom languages
+
+You can create custom languages.
+    
+```php
+use IsaEken\HttpSnippet\Targets\AbstractTarget;
+use IsaEken\HttpSnippet\Contracts\Target;
+use IsaEken\HttpSnippet\CodeGenerator;
+use IsaEken\HttpSnippet\HttpSnippet;
+
+// create custom language
+class CustomLanguage extends AbstractTarget implements Target
+{
+    public static function info(): array
+    {
+        return [
+            "name" => "custom",
+            "title" => "Custom",
+            "link" => "https://example.com",
+            "description" => "Custom language",
+        ];
+    }
+
+    public function make(): CodeGenerator
+    {
+        $code = new CodeGenerator();
+        $method = $this->getHttpSnippet()->getRequest()->getMethod();
+        $uri = $this->getHttpSnippet()->getRequest()->getUri();
+        
+        $code->addLine("method: {$method}");
+        $code->addLine("uri: {$uri}");
+        
+        return $code;
+    }
+}
+
+// register custom language
+HttpSnippet::addTarget('custom', CustomLanguage::class);
+
+// use custom language
+$request = new \GuzzleHttp\Psr7\Request('GET', 'https://example.com');
+return \IsaEken\HttpSnippet\HttpSnippet::make($request, 'custom')->toString();
 ```
 
 # Testing
