@@ -80,7 +80,7 @@ $code = HttpSnippet::make($request, 'language.identifier');
 For instance, to generate the code in PHP using cURL, you would do:
 
 ```php
-$code = HttpSnippet::make($request, 'php.curl');
+$code = HttpSnippet::make($request, 'php.guzzle');
 ```
 
 ### 4. Output or Use the Code
@@ -89,6 +89,25 @@ You can now output or use the generated code as needed. For example, to print th
 
 ```php
 echo $code->toString();
+
+// output:
+// <?php
+//
+// $client = new \GuzzleHttp\Client();
+//
+// $response = $client->request(
+//     'GET',
+//     'https://example.com',
+//     [
+//         'body' => '{"foo":"bar"}',
+//         'headers' => [
+//             "Accept" => "application/json",
+//             "Cookie" => "foo=bar",
+//         ],
+//     ],
+// );
+// 
+// echo $response->getBody();
 ```
 
 Or, to save the code to a file:
