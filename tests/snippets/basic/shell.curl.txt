@@ -1,4 +1,3 @@
 curl \
-  --header "Host: example.com" \
   --request "GET" \
   --url "http://example.com"

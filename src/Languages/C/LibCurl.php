@@ -17,7 +17,7 @@ class LibCurl extends AbstractLanguage implements Language
 
     public function makeHeaders(array $headers, CodeGenerator $code): CodeGenerator
     {
-        if (count($headers) > 0) {
+        if (! empty($headers)) {
             $code->addLine('');
             $code->addLine('struct curl_slist *headers = NULL;');
             $code->addLine('');

@@ -20,6 +20,7 @@ class HttpSnippet
         'csharp.httpclient' => Languages\CSharp\HttpClient::class,
         'csharp.restsharp' => Languages\CSharp\RestSharp::class,
         'php.curl' => Languages\Php\Curl::class,
+        'php.guzzle' => Languages\Php\Guzzle::class,
         'shell.curl' => Languages\Shell\Curl::class,
         'shell.wget' => Languages\Shell\Wget::class,
     ];

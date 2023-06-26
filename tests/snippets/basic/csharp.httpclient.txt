@@ -6,10 +6,6 @@ var request = new HttpRequestMessage
 {
     Method = HttpMethod.Get,
     RequestUri = new Uri("http://example.com"),
-    Headers =
-    {
-        {"Host", "example.com"},
-    },
 };
 
 using (var response = await client.SendAsync(request))

@@ -21,6 +21,10 @@ trait HasRequest
                 $request = Request::fromPsrRequest($request);
             }
 
+            if ($request instanceof \GuzzleHttp\Psr7\Request) {
+                $request = Request::fromGuzzleRequest($request);
+            }
+
             $this->request = $request;
         });
     }

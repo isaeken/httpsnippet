@@ -22,8 +22,23 @@ class CodeGenerator
         return $this->lines;
     }
 
-    public function addLine(string $code, int $intent = 0): self
+    public function addLine(string|array|CodeGenerator $code, int $intent = 0): self
     {
+        if ($code instanceof CodeGenerator) {
+            $lines = $code->getLines();
+            $intent = $code->intent;
+
+            foreach ($lines as $line) {
+                $this->addLine($line['code'], $intent + $line['intent']);
+            }
+
+            return $this;
+        }
+
+        if (is_array($code)) {
+            return $this->addLines($code, $intent);
+        }
+
         $this->lines[] = [
             'code' => $code,
             'divider' => strlen($code) > 0 && ! is_null($this->divider),

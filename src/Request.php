@@ -2,67 +2,67 @@
 
 namespace IsaEken\HttpSnippet;
 
-use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Cookie\CookieJarInterface;
-use GuzzleHttp\Cookie\SetCookie;
-use IsaEken\HttpSnippet\Enums\ContentType;
+use Illuminate\Support\Arr;
+use IsaEken\HttpSnippet\Traits\Request\HasBody;
+use IsaEken\HttpSnippet\Traits\Request\HasCookies;
+use IsaEken\HttpSnippet\Traits\Request\HasHeaders;
+use IsaEken\HttpSnippet\Traits\Request\HasMethod;
+use IsaEken\HttpSnippet\Traits\Request\HasProtocolVersion;
+use IsaEken\HttpSnippet\Traits\Request\HasRequestTarget;
+use IsaEken\HttpSnippet\Traits\Request\HasUri;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
 
-class Request extends \GuzzleHttp\Psr7\Request implements RequestInterface
+class Request implements RequestInterface
 {
-    public function getContentType(): ContentType
-    {
-        $contentType = $this->getHeaderLine('Content-Type');
+    use HasBody;
+    use HasHeaders;
+    use HasMethod;
+    use HasProtocolVersion;
+    use HasRequestTarget;
+    use HasUri;
+    use HasCookies;
 
-        if (str_contains($contentType, 'application/json')) {
-            return ContentType::JSON;
+    public function __construct(
+        string $method,
+        UriInterface|array|string $uri,
+        array $headers = [],
+        mixed $body = null,
+        string $version = '1.1',
+        array $cookies = [],
+    ) {
+        $this
+            ->withMethod($method)
+            ->withUri($uri)
+            ->withHeaders($headers)
+            ->withBody($body)
+            ->withProtocolVersion($version)
+            ->withRequestTarget($this->getUri()->getPath())
+            ->withCookies(static::makeCookiesFromHeaders($this, $this->getUri()->getHost()));
+
+        foreach ($cookies as $name => $value) {
+            $this->addCookie($name, $value);
         }
 
-        if (str_contains($contentType, 'application/x-www-form-urlencoded')) {
-            return ContentType::FORM;
+        if ($this->getCookies()->count() > 0) {
+            $cookies = $this->getCookies()->toArray();
+            $cookies = array_map(fn ($cookie) => $cookie['Name'].'='.$cookie['Value'], $cookies);
+            $this->withAddedHeader('Cookie', $cookies);
         }
-
-        if (str_contains($contentType, 'multipart/form-data')) {
-            return ContentType::MULTIPART;
-        }
-
-        return ContentType::RAW;
-    }
-
-    public function isJson(): bool
-    {
-        return $this->getContentType() === ContentType::JSON;
-    }
-
-    public function getCookies(): CookieJarInterface
-    {
-        $cookies = [];
-        $cookieHeaderLine = $this->getHeaderLine('Cookie');
-
-        if ($cookieHeaderLine) {
-            $cookiePairs = explode('; ', $cookieHeaderLine);
-
-            foreach ($cookiePairs as $cookiePair) {
-                [$name, $value] = explode('=', $cookiePair, 2);
-
-                $cookies[] = [
-                    'Name' => $name,
-                    'Value' => $value,
-                    'Domain' => $this->getUri()->getHost(),
-                    'Path' => $this->getUri()->getPath(),
-                ];
-            }
-        }
-
-        $cookieJar = new CookieJar();
-        foreach ($cookies as $cookie) {
-            $cookieJar->setCookie(new SetCookie($cookie));
-        }
-
-        return $cookieJar;
     }
 
     public static function fromPsrRequest(RequestInterface $request): self
+    {
+        return new self(
+            $request->getMethod(),
+            $request->getUri(),
+            $request->getHeaders(),
+            $request->getBody(),
+            $request->getProtocolVersion()
+        );
+    }
+
+    public static function fromGuzzleRequest(\GuzzleHttp\Psr7\Request $request): self
     {
         return new self(
             $request->getMethod(),

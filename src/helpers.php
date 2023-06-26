@@ -8,8 +8,12 @@ if (! function_exists('escapeForDoubleQuotes')) {
      *
      * @example "Hello \"World\"!" => "Hello \\"World\\"!"
      */
-    function escapeForDoubleQuotes(string $string): string
+    function escapeForDoubleQuotes(string|null $string): string
     {
+        if (is_null($string)) {
+            return '';
+        }
+
         return addcslashes($string, '"\\');
     }
 }
